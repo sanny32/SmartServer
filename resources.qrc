@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/windows/app.ico</file>
+        <file>res/translations/qtbase_ru.qm</file>
+    </qresource>
+</RCC>
