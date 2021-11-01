@@ -84,6 +84,7 @@ void MainWindow::on_smartCardDetected(SmartCardInfo smi)
         id.append(QString::number((BYTE)b, 16));
 
     ui->tableWidget->setItem(row, 0, new QTableWidgetItem(id.join(""), 0));
+    ui->tableWidget->setItem(row, 1, new QTableWidgetItem(smi.firmware(), 0));
 }
 
 ///

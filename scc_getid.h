@@ -9,15 +9,23 @@
 #ifndef SCC_GETID_H
 #define SCC_GETID_H
 
+#include <QString>
 #include "smartcardcommand.h"
 
-class SCC_GetId : public SmartCardCommand
+class SCC_GetId final : public SmartCardCommand
 {
 public:
     SCC_GetId();
 
-protected:
-    QByteArray processResponse(const BYTE* response, unsigned long size) override;
+    QString name() const override
+    {
+        return "GETID";
+    }
+
+    QByteArray send(SCARDHANDLE hCard, unsigned long actProtocol) override;
+
+private:
+    QByteArray send(SCARDHANDLE hCard) override;
 };
 
 #endif // SCC_GETID_H

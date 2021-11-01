@@ -16,14 +16,15 @@ class SmartCardCommand
 {
 public:
     QByteArray command() const;
-    size_t length() const;
+    unsigned long length() const;
 
-    QByteArray send(SCARDHANDLE hCard, unsigned long actProtocol);
+    virtual QString name() const = 0;
+
+    virtual QByteArray send(SCARDHANDLE hCard) = 0;
+    virtual QByteArray send(SCARDHANDLE hCard, unsigned long actProtocol) = 0;
 
 protected:
     SmartCardCommand(const QByteArray& bytes);
-
-    virtual QByteArray processResponse(const BYTE* response, unsigned long size) = 0;
 
 private:
     QByteArray _command;

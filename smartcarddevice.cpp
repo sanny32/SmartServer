@@ -11,6 +11,7 @@
 #include "smartcarddevice.h"
 #include "smartcarderror.h"
 #include "scc_getid.h"
+#include "scc_getfirmware.h"
 
 ///
 /// \brief SmartCardDevice::SmartCardDevice
@@ -64,10 +65,19 @@ SmartCardInfo SmartCardDevice::readSmartCardInfo()
 
     try
     {
-        SCC_GetId sc;
-        const auto cardId = sc.send(_hCard, _actProtocol);
+        {
+            SCC_GetId sc;
+            const auto cardId = sc.send(_hCard, _actProtocol);
 
-        smi.setId(cardId);
+            smi.setId(cardId);
+        }
+
+        {
+            SCC_GetFirmware sc;
+            const auto firmware = sc.send(_hCard);
+
+            smi.setFirmware(firmware);
+        }
     }
     catch(std::exception& ex)
     {

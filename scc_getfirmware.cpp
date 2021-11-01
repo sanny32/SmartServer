@@ -7,6 +7,7 @@
 //
 
 #include "scc_getfirmware.h"
+#include "smartcarderror.h"
 
 ///
 /// \brief SCC_GetFirmware::SCC_GetFirmware
@@ -17,19 +18,41 @@ SCC_GetFirmware::SCC_GetFirmware()
 }
 
 ///
-/// \brief SCC_GetFirmware::processResponse
-/// \param response
-/// \param size
+/// \brief SCC_GetFirmware::send
+/// \param hCard
+/// \param actProtocol
 /// \return
 ///
-QByteArray SCC_GetFirmware::processResponse(const BYTE* response, unsigned long size)
+QByteArray SCC_GetFirmware::send(SCARDHANDLE hCard)
 {
-    if(size > 5)
+    BYTE recvBuff[262];
+    unsigned long recvLen = 262;
+    const auto retCode = SCardControl(hCard, 0x310000 + 3500*4, (LPCBYTE)command().data(), length(), recvBuff, recvLen, &recvLen);
+    if(retCode != SCARD_S_SUCCESS)
     {
-        return QByteArray((char*)response + 5, size - 5);
+        throw SmartCardError(retCode, QString("Команда %1. Функция SCardControl возвратила ошибку").arg(name()));
+    }
+
+    if(recvLen > 5)
+    {
+        return QByteArray((char*)recvBuff + 5, recvLen - 5);
     }
     else
     {
-        throw std::runtime_error("Некорректный размер ответа");
+        const auto error = QString("Команда %1. Некорректный размер ответа").arg(name());
+        throw std::runtime_error(error.toStdString());
     }
+}
+
+///
+/// \brief SCC_GetFirmware::send
+/// \param hCard
+/// \param actProtocol
+/// \return
+///
+QByteArray SCC_GetFirmware::send(SCARDHANDLE hCard, unsigned long actProtocol)
+{
+    Q_UNUSED(hCard)
+    Q_UNUSED(actProtocol)
+    throw std::runtime_error("Not implemented");
 }

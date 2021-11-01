@@ -109,6 +109,11 @@
         <string>Id</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>Firmware</string>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>

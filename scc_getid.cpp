@@ -7,6 +7,7 @@
 //
 
 #include "scc_getid.h"
+#include "smartcarderror.h"
 
 ///
 /// \brief SCC_GetId::SCC_GetId
@@ -17,19 +18,43 @@ SCC_GetId::SCC_GetId()
 }
 
 ///
-/// \brief SCC_GetId::processResponse
-/// \param response
-/// \param size
+/// \brief SmartCardCommand::send
+/// \param hCard
+/// \param actProtocol
 /// \return
 ///
-QByteArray SCC_GetId::processResponse(const BYTE* response, unsigned long size)
+QByteArray SCC_GetId::send(SCARDHANDLE hCard, unsigned long actProtocol)
 {
-    if(size > 2)
+    SCARD_IO_REQUEST ioRequest;
+    ioRequest.dwProtocol = actProtocol;
+    ioRequest.cbPciLength = sizeof(SCARD_IO_REQUEST);
+
+    BYTE recvBuff[262];
+    unsigned long recvLen = 262;
+    const auto retCode = SCardTransmit(hCard, &ioRequest, (LPCBYTE)command().data(), length(), nullptr, recvBuff, &recvLen);
+    if(retCode != SCARD_S_SUCCESS)
     {
-        return QByteArray((char*)response, size - 2);
+        throw SmartCardError(retCode, QString("Команда %1. Функция SCardTransmit возвратила ошибку").arg(name()));
+    }
+
+    if(recvLen > 2)
+    {
+        return QByteArray((char*)recvBuff, recvLen - 2);
     }
     else
     {
-        throw std::runtime_error("Некорректный размер ответа");
+        const auto error = QString("Команда %1. Некорректный размер ответа").arg(name());
+        throw std::runtime_error(error.toStdString());
     }
+}
+
+///
+/// \brief SmartCardCommand::send
+/// \param hCard
+/// \return
+///
+QByteArray SCC_GetId::send(SCARDHANDLE hCard)
+{
+    Q_UNUSED(hCard)
+    throw std::runtime_error("Not implemented");
 }
