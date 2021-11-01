@@ -53,3 +53,5 @@ compile_commands.json
 /SmartServer_resource.rc
 *.obj
 *.vc.pdb
+/debug
+/release
