@@ -12,22 +12,54 @@
 #include <QString>
 #include <QMetaClassInfo>
 
+///
+/// \brief Идентификатор смарт-карты
+///
+class SmId: public QByteArray
+{
+public:
+    SmId();
+    SmId(const QByteArray& bytes);
+
+    operator QString() const;
+    QString toString() const;
+};
+
+///
+/// \brief Версия firmware
+///
+class SmFirmware: public QByteArray
+{
+public:
+    SmFirmware();
+    SmFirmware(const QByteArray& bytes);
+
+    operator QString() const;
+    QString toString() const;
+};
+
+///
+/// \brief Информация о смарт-карте
+///
 class SmartCardInfo
 {
 public:
     SmartCardInfo();
 
-    QString firmware() const;
-    void setFirmware(const QByteArray& bytes);
+    SmFirmware firmware() const;
+    void setFirmware(const SmFirmware& bytes);
 
-    QByteArray id() const;
-    void setId(const QByteArray& bytes);
+    SmId id() const;
+    void setId(const SmId& bytes);
 
     bool isValid() const;
 
+    friend bool operator==(const SmartCardInfo& smi1, const SmartCardInfo& smi2);
+    friend bool operator!=(const SmartCardInfo& smi1, const SmartCardInfo& smi2);
+
 private:
-    QByteArray _id;
-    QByteArray _firmware;
+    SmId _id;
+    SmFirmware _firmware;
 };
 Q_DECLARE_METATYPE(SmartCardInfo);
 

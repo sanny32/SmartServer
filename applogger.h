@@ -12,7 +12,8 @@
 #include <mutex>
 #include <QFile>
 #include <QtDebug>
-#include <QCoreApplication>
+#include <QListWidget>
+#include <QApplication>
 
 class AppLogger
 {
@@ -28,13 +29,20 @@ public:
     /// \param app
     /// \param filename
     ///
-    void setup(const QCoreApplication& app, const QString _filename = "");
+    void setup(const QApplication& app, const QString _filename = "");
+
+    ///
+    /// \brief setup
+    /// \param app
+    /// \param listWidget
+    ///
+    void setup(const QApplication& app, QListWidget* listWidget);
 
     ///
     /// \brief hello
     /// \param app
     ///
-    void hello(const QCoreApplication& app) const;
+    void hello(const QApplication& app) const;
 
 private:
     AppLogger();
@@ -46,10 +54,12 @@ private:
 private:
     QFile _logFile;
     QString _filename;
+    QListWidget* _listWidget;
 
     static std::mutex mutex;
-    static void defaultHandler(QtMsgType type, const QMessageLogContext &, const QString & msg);
-    static void fileHandler(QtMsgType type, const QMessageLogContext &, const QString & msg);
+    static void defaultHandler(QtMsgType type, const QMessageLogContext& ctx, const QString& msg);
+    static void fileHandler(QtMsgType type, const QMessageLogContext& ctx, const QString& msg);
+    static void listWidgetHandler(QtMsgType type, const QMessageLogContext& ctx, const QString& msg);
 };
 
 #endif // APPLOGGER_H

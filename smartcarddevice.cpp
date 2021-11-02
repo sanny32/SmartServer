@@ -28,6 +28,7 @@ SmartCardDevice::SmartCardDevice(SCARDCONTEXT hContext, const QString& name, QOb
 {       
     std::thread([&](std::wstring name)
     {
+        SmartCardInfo lastCard;
         do
         {
             const auto retCode = SCardConnect(_hContext, name.c_str(), SCARD_SHARE_DIRECT, SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1, &_hCard, &_actProtocol);
@@ -36,10 +37,15 @@ SmartCardDevice::SmartCardDevice(SCARDCONTEXT hContext, const QString& name, QOb
                 const auto smi = readSmartCardInfo();
                 SCardDisconnect(_hCard, SCARD_LEAVE_CARD);
 
-                if(smi.isValid())
+                if(smi.isValid() && smi != lastCard)
                 {
+                    lastCard = smi;
                     emit smartCardDetected(smi);
                 }
+            }
+            else
+            {
+                lastCard = SmartCardInfo();
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }

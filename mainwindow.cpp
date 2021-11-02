@@ -9,7 +9,7 @@
 #include <thread>
 #include <QDebug>
 #include <QAbstractEventDispatcher>
-#include "qwaitcursor.h"
+#include "applogger.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     ,_hContext(0)
 {
     ui->setupUi(this);
+    AppLogger::getInstance().setup(*qApp, ui->logWidget);
 
     // событие, генерируемое при бездействии основного GUI-потока приложения
     auto dispatcher = QAbstractEventDispatcher::instance();
@@ -56,18 +57,13 @@ void MainWindow::on_awake()
 }
 
 ///
-/// \brief MainWindow::on_connectToSmartReder_clicked
+/// \brief MainWindow::on_smartReaderSelector_currentTextChanged
+/// \param text
 ///
-void MainWindow::on_connectToSmartReder_clicked()
+void MainWindow::on_smartReaderSelector_currentTextChanged(const QString& text)
 {
-    QWaitCursor wait;
-
-    if(_smartCardDevice == nullptr)
-    {
-        const auto name = ui->smartReaderSelector->currentText();
-        _smartCardDevice = std::make_unique<SmartCardDevice>(_hContext, name);
-        connect(_smartCardDevice.get(), &SmartCardDevice::smartCardDetected, this, &MainWindow::on_smartCardDetected);
-    }
+    _smartCardDevice = std::make_unique<SmartCardDevice>(_hContext, text);
+    connect(_smartCardDevice.get(), &SmartCardDevice::smartCardDetected, this, &MainWindow::on_smartCardDetected);
 }
 
 ///
@@ -76,15 +72,7 @@ void MainWindow::on_connectToSmartReder_clicked()
 ///
 void MainWindow::on_smartCardDetected(SmartCardInfo smi)
 {
-    const auto row = ui->tableWidget->rowCount();
-    ui->tableWidget->insertRow(row);
-
-    QStringList id;
-    for(auto&& b : smi.id())
-        id.append(QString::number((BYTE)b, 16));
-
-    ui->tableWidget->setItem(row, 0, new QTableWidgetItem(id.join(""), 0));
-    ui->tableWidget->setItem(row, 1, new QTableWidgetItem(smi.firmware(), 0));
+    qInfo().noquote().nospace() << "Обнаружена смарт-карта [" << smi.id().toString() << "]";
 }
 
 ///
@@ -113,6 +101,6 @@ void MainWindow::updateSmartReaderSelector()
     }
     else
     {
-        qCritical().nospace() << "Ошибка получения списка устройств чтения смарт карт (" << retCode << ")";
+        qCritical().nospace() << "Ошибка получения списка устройств чтения смарт-карт (" << retCode << ")";
     }
 }

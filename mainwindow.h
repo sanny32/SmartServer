@@ -27,8 +27,8 @@ public:
 
 private slots:
     void on_awake();
-    void on_connectToSmartReder_clicked();
     void on_smartCardDetected(SmartCardInfo smi);
+    void on_smartReaderSelector_currentTextChanged(const QString& text);
 
 private:
     void updateSmartReaderSelector();

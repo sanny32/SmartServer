@@ -15,7 +15,7 @@
 SmartCardError::SmartCardError(long code, const QString& message)
     :_code(code)
 {        
-    _what = QString("%1. (Код ошибки: %2)").arg(message, QString::number(code, 10)).toStdString();
+    _what = QString("%1. Код ошибки: %2").arg(message, QString::number(code, 10)).toStdString();
 }
 
 ///

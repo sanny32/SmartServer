@@ -8,6 +8,83 @@
 
 #include "smartcardinfo.h"
 
+///
+/// \brief SmId::SmId
+///
+SmId::SmId()
+    :QByteArray()
+{
+}
+
+///
+/// \brief SmId::SmId
+/// \param bytes
+///
+SmId::SmId(const QByteArray& bytes)
+    :QByteArray(bytes)
+{
+}
+
+///
+/// \brief SmId::operator QString
+///
+SmId::operator QString() const
+{
+    return toString();
+}
+
+///
+/// \brief SmId::toString
+/// \return
+///
+QString SmId::toString() const
+{
+    QStringList id;
+    for(auto&& b : *this)
+    {
+        id.append(QString::number((unsigned char)b, 16));
+    }
+
+    return id.join(" ");
+}
+
+///
+/// \brief SmFirmware::SmFirmware
+///
+SmFirmware::SmFirmware()
+    :QByteArray()
+{
+}
+
+///
+/// \brief SmFirmware::SmFirmware
+/// \param bytes
+///
+SmFirmware::SmFirmware(const QByteArray& bytes)
+    :QByteArray(bytes)
+{
+}
+
+///
+/// \brief SmFirmware::operator QString
+///
+SmFirmware::operator QString() const
+{
+    return toString();
+}
+
+///
+/// \brief SmFirmware::toString
+/// \return
+///
+QString SmFirmware::toString() const
+{
+    return QString::fromLatin1(*this);
+}
+
+///
+/// \brief SmartCardInfo::SmartCardInfo
+///
 SmartCardInfo::SmartCardInfo()
 {
     static const int reg = qRegisterMetaType<SmartCardInfo>();
@@ -18,16 +95,16 @@ SmartCardInfo::SmartCardInfo()
 /// \brief SmartCardInfo::firmware
 /// \return
 ///
-QString SmartCardInfo::firmware() const
+SmFirmware SmartCardInfo::firmware() const
 {
-    return QString::fromLatin1(_firmware);
+    return _firmware;
 }
 
 ///
 /// \brief SmartCardInfo::setFirmware
 /// \param bytes
 ///
-void SmartCardInfo::setFirmware(const QByteArray& bytes)
+void SmartCardInfo::setFirmware(const SmFirmware& bytes)
 {
     _firmware = bytes;
 }
@@ -36,7 +113,7 @@ void SmartCardInfo::setFirmware(const QByteArray& bytes)
 /// \brief SmartCardInfo::id
 /// \return
 ///
-QByteArray SmartCardInfo::id() const
+SmId SmartCardInfo::id() const
 {
     return _id;
 }
@@ -45,7 +122,7 @@ QByteArray SmartCardInfo::id() const
 /// \brief SmartCardInfo::setId
 /// \param bytes
 ///
-void SmartCardInfo::setId(const QByteArray& bytes)
+void SmartCardInfo::setId(const SmId& bytes)
 {
     _id = bytes;
 }
@@ -57,4 +134,26 @@ void SmartCardInfo::setId(const QByteArray& bytes)
 bool SmartCardInfo::isValid() const
 {
     return !_id.isEmpty();
+}
+
+///
+/// \brief operator ==
+/// \param smi1
+/// \param smi2
+/// \return
+///
+bool operator==(const SmartCardInfo& smi1, const SmartCardInfo& smi2)
+{
+    return smi1.id() == smi2.id();
+}
+
+///
+/// \brief operator !=
+/// \param smi1
+/// \param smi2
+/// \return
+///
+bool operator!=(const SmartCardInfo& smi1, const SmartCardInfo& smi2)
+{
+    return !operator==(smi1, smi2);
 }

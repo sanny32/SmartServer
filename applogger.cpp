@@ -37,7 +37,7 @@ AppLogger::~AppLogger()
 /// \param app
 /// \param filename
 ///
-void AppLogger::setup(const QCoreApplication& app, const QString filename)
+void AppLogger::setup(const QApplication& app, const QString filename)
 {
     QString appDir = app.applicationDirPath();
     if(filename.isEmpty())
@@ -63,10 +63,23 @@ void AppLogger::setup(const QCoreApplication& app, const QString filename)
 }
 
 ///
+/// \brief AppLogger::setup
+/// \param app
+/// \param listWidget
+///
+void AppLogger::setup(const QApplication& app, QListWidget* listWidget)
+{
+    _listWidget = listWidget;
+    qInstallMessageHandler(AppLogger::listWidgetHandler);
+
+    hello(app);
+}
+
+///
 /// \brief AppLogger::hello
 /// \param app
 ///
-void AppLogger::hello(const QCoreApplication& app) const
+void AppLogger::hello(const QApplication& app) const
 {
     qInfo().noquote() << app.applicationName() << app.applicationVersion() << QSysInfo::currentCpuArchitecture();
 }
@@ -153,4 +166,43 @@ void AppLogger::fileHandler(QtMsgType type, const QMessageLogContext& ctx, const
             ts << text << endl;
         }
     }
+}
+
+///
+/// \brief AppLogger::listWidgetHandler
+/// \param type
+/// \param msg
+///
+void AppLogger::listWidgetHandler(QtMsgType type, const QMessageLogContext& ctx, const QString& msg)
+{
+    auto now = QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss.zzz");
+
+    QString category = ctx.category;
+    QString text = (category == "default") ? msg : QString("[%1] %2").arg(ctx.category, msg);
+
+    switch (type)
+    {
+        case QtDebugMsg:
+            text = QString("[%1] Debug: %2").arg(now, text);
+        break;
+
+        case QtInfoMsg:
+            text = QString("[%1] Info: %2").arg(now, text);
+        break;
+
+        case QtWarningMsg:
+            text = QString("[%1] Warning: %2").arg(now, text);
+        break;
+
+        case QtCriticalMsg:
+            text = QString("[%1] Critical: %2").arg(now, text);
+        break;
+
+        case QtFatalMsg:
+            text = QString("[%1] Fatal: %2").arg(now, text);
+        break;
+    }
+
+    AppLogger::getInstance()._listWidget->addItem(text);
+    AppLogger::getInstance()._listWidget->scrollToBottom();
 }
