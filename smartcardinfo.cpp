@@ -49,6 +49,23 @@ QString SmId::toString() const
 }
 
 ///
+/// \brief SmId::toUInts
+/// \return
+///
+QList<quint16> SmId::toUInts() const
+{
+    QList<quint16> uints;
+    for(int i = 0; i < size() - 1; i+=2)
+    {
+        const quint8 low = (quint8)at(i + 1);
+        const quint8 hi = (quint8)at(i);
+        uints.push_back(low | (static_cast<quint16>(hi) << 8));
+    }
+
+    return uints;
+}
+
+///
 /// \brief SmFirmware::SmFirmware
 ///
 SmFirmware::SmFirmware()

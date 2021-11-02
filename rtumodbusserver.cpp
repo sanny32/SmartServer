@@ -19,17 +19,24 @@ RtuModbusServer::RtuModbusServer()
 }
 
 ///
+/// \brief RtuModbusServer::~RtuModbusServer
+///
+RtuModbusServer::~RtuModbusServer()
+{
+    disconnectDevice();
+}
+
+///
 /// \brief RtuModbusServer::addSmartCardInfo
 /// \param smi
 ///
 void RtuModbusServer::addSmartCardInfo(const SmartCardInfo& smi)
 {
-    const auto id = smi.id();
-    const auto addr = _reg[QModbusDataUnit::InputRegisters].value(0);
-    for(int i = 0; i < id.size() - 1; i+=2)
-    {
-        const quint16 value = id[i] | id[i + 1] << 8;
-        setData(QModbusDataUnit::InputRegisters, addr + i % 2, value);
+    const auto id = smi.id().toUInts();
+    const auto address = _buffer->nextAddress();
+    for(int i = 0; i < id.size(); i++)
+    {        
+        setData(_buffer->registerType(), address + i, id[i]);
     }
 }
 
@@ -38,11 +45,13 @@ void RtuModbusServer::addSmartCardInfo(const SmartCardInfo& smi)
 /// \param type
 /// \param start
 /// \param count
+/// \param alignment
 ///
-void RtuModbusServer::createRegisters(QModbusDataUnit::RegisterType type, quint16 start, quint16 count)
-{
-    _reg.insert(type, { type, start, count });
-    setMap(_reg);
+void RtuModbusServer::createRegisters(QModbusDataUnit::RegisterType type, quint16 start, quint16 count, quint8 alignment)
+{   
+    _buffer = std::make_unique<RtuModbusDataBuffer>(type, start, count);
+    _buffer->setDataAlignment(alignment);
+    setMap(_buffer->getModbusDataUnitMap());
 }
 
 ///
@@ -51,7 +60,7 @@ void RtuModbusServer::createRegisters(QModbusDataUnit::RegisterType type, quint1
 ///
 void RtuModbusServer::on_stateChanged(QModbusDevice::State state)
 {
-    qDebug() << state;
+    //qDebug() << state;
 }
 
 ///
@@ -62,5 +71,5 @@ void RtuModbusServer::on_stateChanged(QModbusDevice::State state)
 ///
 void RtuModbusServer::on_dataWritten(QModbusDataUnit::RegisterType table, int address, int size)
 {
-    qDebug() << table << address << size;
+    //qDebug() << table << address << size;
 }

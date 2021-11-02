@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
 
         updateSmartReaderSelector();
         updateSerialPortSelector();
+        updateAddressTypeSelector();
     }
     catch (std::exception& ex)
     {
@@ -83,6 +84,36 @@ void MainWindow::on_smartReaderSelector_currentTextChanged(const QString& text)
 }
 
 ///
+/// \brief MainWindow::on_startAddress_textEdited
+/// \param text
+///
+void MainWindow::on_startAddress_textEdited(const QString& text)
+{
+    Q_UNUSED(text)
+    createRtuModbusServer();
+}
+
+///
+/// \brief MainWindow::on_bufferSize_textEdited
+/// \param text
+///
+void MainWindow::on_bufferSize_textEdited(const QString& text)
+{
+    Q_UNUSED(text)
+    createRtuModbusServer();
+}
+
+///
+/// \brief MainWindow::on_addressTypeSelector_currentIndexChanged
+/// \param index
+///
+void MainWindow::on_addressTypeSelector_currentIndexChanged(int index)
+{
+    Q_UNUSED(index)
+    createRtuModbusServer();
+}
+
+///
 /// \brief MainWindow::on_serialPortSelector_currentTextChanged
 /// \param text
 ///
@@ -100,6 +131,14 @@ void MainWindow::on_smartCardDetected(SmartCardInfo smi)
 {
     qInfo().noquote().nospace() << "Обнаружена смарт-карта [" << smi.id().toString() << "]";
     _rtuModbusServer->addSmartCardInfo(smi);
+
+    const auto id = smi.id().toUInts();
+    for(int i = 0; i < id.size(); i++)
+    {
+        auto item = ui->modbusTableWidget->item(0, i);
+        const auto text = QString("%1H").arg(id[i], 4, 16, QLatin1Char('0'));
+        item->setText(text.toUpper());
+    }
 }
 
 ///
@@ -154,31 +193,59 @@ void MainWindow::updateSerialPortSelector()
 }
 
 ///
+/// \brief MainWindow::updateAddressTypeSelector
+///
+void MainWindow::updateAddressTypeSelector()
+{
+    ui->addressTypeSelector->clear();
+    ui->addressTypeSelector->addItem("3x", QModbusDataUnit::InputRegisters);
+    ui->addressTypeSelector->addItem("4x", QModbusDataUnit::HoldingRegisters);
+}
+
+///
 /// \brief MainWindow::setupModbusTableWidget
 ///
 void MainWindow::setupModbusTableWidget()
 {
     const auto startAddress = ui->startAddress->text().toUShort();
     const auto bufferSize = ui->bufferSize->text().toUShort();
+    const auto addressType = ui->addressTypeSelector->currentData().value<QModbusDataUnit::RegisterType>();
 
     ui->modbusTableWidget->clear();
 
-    ui->modbusTableWidget->setColumnCount(4);
+    ui->modbusTableWidget->setColumnCount(_dataAlignmnet);
     ui->modbusTableWidget->setRowCount(bufferSize);
 
     for(int i = 0; i < ui->modbusTableWidget->columnCount(); i++)
     {
-        ui->modbusTableWidget->setHorizontalHeaderItem(i, new QTableWidgetItem(QString::number(i)));
+        const auto text = QString::number(i);
+        ui->modbusTableWidget->setHorizontalHeaderItem(i, new QTableWidgetItem(text));
     }
 
     for(int i = 0; i < ui->modbusTableWidget->rowCount(); i++)
-    {
+    {        
+        QString addressPrefix;
+        switch (addressType)
+        {
+            case QModbusDataUnit::InputRegisters:
+                addressPrefix = "3";
+            break;
+
+            case QModbusDataUnit::HoldingRegisters:
+                addressPrefix = "4";
+            break;
+
+            default:
+            break;
+        }
+
         const int address = startAddress + i * ui->modbusTableWidget->columnCount();
-        ui->modbusTableWidget->setVerticalHeaderItem(i, new QTableWidgetItem(QString("3%1").arg(address, 4, 10, QLatin1Char('0'))));
+        const auto addressText = QString("%1").arg(address, 4, 10, QLatin1Char('0'));
+        ui->modbusTableWidget->setVerticalHeaderItem(i, new QTableWidgetItem(QString("%1%2").arg(addressPrefix, addressText)));
 
         for(int j = 0; j < ui->modbusTableWidget->columnCount(); j++)
         {
-            auto item = new QTableWidgetItem("00");
+            auto item = new QTableWidgetItem("0000H");
             item->setTextAlignment(Qt::AlignCenter);
 
             ui->modbusTableWidget->setItem(i, j, item);
@@ -200,7 +267,8 @@ void MainWindow::createRtuModbusServer()
 
     const auto startAddress = ui->startAddress->text().toUShort();
     const auto bufferSize = ui->bufferSize->text().toUShort();
-    _rtuModbusServer->createRegisters(QModbusDataUnit::InputRegisters, startAddress - 1, bufferSize * 4);
+    const auto addressType = ui->addressTypeSelector->currentData().value<QModbusDataUnit::RegisterType>();
+    _rtuModbusServer->createRegisters(addressType, startAddress - 1, bufferSize * _dataAlignmnet, _dataAlignmnet);
 
     _rtuModbusServer->connectDevice();
 

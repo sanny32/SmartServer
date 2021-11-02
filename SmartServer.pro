@@ -72,6 +72,7 @@ SOURCES += \
     applogger.cpp \
     main.cpp \
     mainwindow.cpp \
+    rtumodbusdatabuffer.cpp \
     rtumodbusserver.cpp \
     scc_getfirmware.cpp \
     scc_getid.cpp \
@@ -84,6 +85,7 @@ HEADERS += \
     applogger.h \
     mainwindow.h \
     qwaitcursor.h \
+    rtumodbusdatabuffer.h \
     rtumodbusserver.h \
     scc_getfirmware.h \
     scc_getid.h \

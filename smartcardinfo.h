@@ -23,6 +23,8 @@ public:
 
     operator QString() const;
     QString toString() const;
+
+    QList<quint16> toUInts() const;
 };
 
 ///
