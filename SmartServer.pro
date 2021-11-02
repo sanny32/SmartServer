@@ -7,7 +7,7 @@
 #-------------------------------------------------
 
 
-QT       += core gui widgets
+QT       += core gui widgets serialbus serialport
 
 TARGET = SmartServer
 TEMPLATE = app
@@ -72,6 +72,7 @@ SOURCES += \
     applogger.cpp \
     main.cpp \
     mainwindow.cpp \
+    rtumodbusserver.cpp \
     scc_getfirmware.cpp \
     scc_getid.cpp \
     smartcardcommand.cpp \
@@ -83,6 +84,7 @@ HEADERS += \
     applogger.h \
     mainwindow.h \
     qwaitcursor.h \
+    rtumodbusserver.h \
     scc_getfirmware.h \
     scc_getid.h \
     smartcardcommand.h \
