@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>res/windows/app.ico</file>
         <file>res/translations/qtbase_ru.qm</file>
+        <file>res/windows/iconReload.png</file>
     </qresource>
 </RCC>

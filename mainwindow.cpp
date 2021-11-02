@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QAbstractEventDispatcher>
 #include "applogger.h"
+#include "smartcarderror.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -29,14 +30,19 @@ MainWindow::MainWindow(QWidget *parent)
     auto dispatcher = QAbstractEventDispatcher::instance();
     connect(dispatcher, SIGNAL(awake()), this, SLOT(on_awake()));
 
-    const auto retCode = SCardEstablishContext(SCARD_SCOPE_USER, nullptr, nullptr, &_hContext);
-    if(retCode != SCARD_S_SUCCESS)
+    try
     {
-        qCritical().nospace() << "Ошибка инициализации контекста (" << retCode << ")";
-    }
-    else
-    {
+        const auto retCode = SCardEstablishContext(SCARD_SCOPE_USER, nullptr, nullptr, &_hContext);
+        if(retCode != SCARD_S_SUCCESS)
+        {
+            throw SmartCardError(retCode, "Ошибка инициализации контекста");
+        }
+
         updateSmartReaderSelector();
+    }
+    catch (std::exception& ex)
+    {
+        qCritical().noquote() << ex.what();
     }
 }
 
@@ -54,6 +60,14 @@ MainWindow::~MainWindow()
 ///
 void MainWindow::on_awake()
 {
+}
+
+///
+/// \brief MainWindow::on_refreshSmartReaders_clicked
+///
+void MainWindow::on_refreshSmartReaders_clicked()
+{
+    updateSmartReaderSelector();
 }
 
 ///

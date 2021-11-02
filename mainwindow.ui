@@ -44,6 +44,23 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="refreshSmartReaders">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources.qrc">
+           <normaloff>:/res/windows/iconReload.png</normaloff>:/res/windows/iconReload.png</iconset>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -139,6 +156,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
