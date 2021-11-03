@@ -11,6 +11,7 @@
 #include <QSerialPortInfo>
 #include <QAbstractEventDispatcher>
 #include "applogger.h"
+#include "appsettings.h"
 #include "smartcarderror.h"
 #include "dialogserialportsettings.h"
 #include "mainwindow.h"
@@ -32,23 +33,13 @@ MainWindow::MainWindow(QWidget *parent)
     auto dispatcher = QAbstractEventDispatcher::instance();
     connect(dispatcher, SIGNAL(awake()), this, SLOT(on_awake()));
 
-    try
-    {
-        const auto retCode = SCardEstablishContext(SCARD_SCOPE_USER, nullptr, nullptr, &_hContext);
-        if(retCode != SCARD_S_SUCCESS)
-        {
-            throw SmartCardError(retCode, "Ошибка инициализации контекста");
-        }
+    updateSmartReaderSelector();
+    updateSerialPortSelector();
+    updateAddressTypeSelector();
 
-        updateSmartReaderSelector();
-        updateSerialPortSelector();
-        updateAddressTypeSelector();
-    }
-    catch (std::exception& ex)
-    {
-        qCritical().noquote() << ex.what();
-    }
+    loadSettings();
 }
+
 
 ///
 /// \brief MainWindow::~MainWindow
@@ -57,6 +48,12 @@ MainWindow::~MainWindow()
 {    
     SCardReleaseContext(_hContext);
     delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    saveSettings();
+    QMainWindow::closeEvent(event);
 }
 
 ///
@@ -184,6 +181,58 @@ void MainWindow::on_rtuModbusServerDataWritten(QModbusDataUnit::RegisterType tab
 }
 
 ///
+/// \brief MainWindow::loadSettings
+///
+void MainWindow::loadSettings()
+{
+    const auto smartCardReader = AppSettings::instance()->GetSetting(AppSettings::SmartCardReader).toString();
+    ui->smartReaderSelector->setCurrentText(smartCardReader);
+
+    const auto serialPortSettings = AppSettings::instance()->GetSetting(AppSettings::SerialPortSettings).value<SerialPortSettings>();
+    if(!serialPortSettings.name().isEmpty())
+    {
+        _serialPortsSettings[serialPortSettings.name()] = serialPortSettings;
+        ui->serialPortSelector->setCurrentText(serialPortSettings.name());
+    }
+
+    const auto modbusAddressType = AppSettings::instance()->GetSetting(AppSettings::ModbusAddressType).toString();
+    ui->addressTypeSelector->setCurrentText(modbusAddressType);
+
+    const auto modbusStartAddress = AppSettings::instance()->GetSetting(AppSettings::ModbusStartAddress).toUInt();
+    ui->startAddress->setText(QString::number(modbusStartAddress));
+
+    const auto modbusBufferSize = AppSettings::instance()->GetSetting(AppSettings::ModbusBufferSize).toUInt();
+    ui->bufferSize->setText(QString::number(modbusBufferSize));
+
+    createRtuModbusServer();
+}
+
+///
+/// \brief MainWindow::saveSettings
+///
+void MainWindow::saveSettings()
+{
+    const auto smartCardReader = ui->smartReaderSelector->currentText();
+    AppSettings::instance()->SetSetting(AppSettings::SmartCardReader, smartCardReader);
+
+    const auto portName = ui->serialPortSelector->currentText();
+    if(!portName.isEmpty())
+    {
+        const auto serialPortSettings = _serialPortsSettings[portName];
+        AppSettings::instance()->SetSetting(AppSettings::SerialPortSettings, QVariant::fromValue(serialPortSettings));
+    }
+
+    const auto modbusAddressType = ui->addressTypeSelector->currentText();
+    AppSettings::instance()->SetSetting(AppSettings::ModbusAddressType, modbusAddressType);
+
+    const auto modbusStartAddress = ui->startAddress->text();
+    AppSettings::instance()->SetSetting(AppSettings::ModbusStartAddress, modbusStartAddress);
+
+    const auto modbusBufferSize = ui->bufferSize->text();
+    AppSettings::instance()->SetSetting(AppSettings::ModbusBufferSize, modbusBufferSize);
+}
+
+///
 /// \brief MainWindow::updateSmartReaderSelector
 ///
 void MainWindow::updateSmartReaderSelector()
@@ -192,9 +241,21 @@ void MainWindow::updateSmartReaderSelector()
 
     try
     {
+        if(_hContext != 0)
+        {
+            SCardReleaseContext(_hContext);
+            _hContext = 0;
+        }
+
+        auto retCode = SCardEstablishContext(SCARD_SCOPE_USER, nullptr, nullptr, &_hContext);
+        if(retCode != SCARD_S_SUCCESS)
+        {
+            throw SmartCardError(retCode, "Ошибка инициализации контекста");
+        }
+
         LPTSTR pmszReaders = nullptr;
         unsigned long size = SCARD_AUTOALLOCATE;
-        const auto retCode = SCardListReaders(_hContext, nullptr, (LPTSTR)&pmszReaders, &size);
+        retCode = SCardListReaders(_hContext, nullptr, (LPTSTR)&pmszReaders, &size);
 
         if(retCode == SCARD_S_SUCCESS)
         {
@@ -226,11 +287,17 @@ void MainWindow::updateSmartReaderSelector()
 void MainWindow::updateSerialPortSelector()
 {
     ui->serialPortSelector->clear();
-    const auto serialPorts = QSerialPortInfo::availablePorts();
+    _serialPortsSettings.clear();
 
+    const auto serialPorts = QSerialPortInfo::availablePorts();
     for(auto&& serialPort : serialPorts)
     {
-        ui->serialPortSelector->addItem(serialPort.portName());
+        const auto portName = serialPort.portName();
+        if(!portName.isEmpty())
+        {
+            ui->serialPortSelector->addItem(portName);
+            _serialPortsSettings[portName] = SerialPortSettings(portName);
+        }
     }
 
     ui->serialPortSettings->setEnabled(!serialPorts.isEmpty());

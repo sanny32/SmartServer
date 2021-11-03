@@ -9,12 +9,20 @@
 #include "mainwindow.h"
 
 #include <QtCore>
-#include <QApplication>
-#include "applogger.h"
+#include "application.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);    
+    Application::setOrganizationName(TARGET_COMPANY);
+    Application::setOrganizationDomain(TARGET_DOMAIN);
+    Application::setApplicationVersion(APP_VERSION);
+    Application::setApplicationBuildNumber(APP_BUILD);
+    Application::setRevisionNumber(APP_REVISION);
+    Application::setApplicationBranch(APP_BRANCH);
+    Application::setApplicationCopyright(APP_COPYRIGHT);
+
+    Application a(argc, argv);
+    a.setupTranslator(":/res/translations/qtbase_ru.qm");
 
     MainWindow w;
     w.show();

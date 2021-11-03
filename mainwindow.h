@@ -27,6 +27,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private slots:
     void on_awake();
     void on_smartCardDetected(SmartCardInfo smi);
@@ -40,6 +43,8 @@ private slots:
     void on_smartReaderSelector_currentTextChanged(const QString& text);
 
 private:
+    void loadSettings();
+    void saveSettings();
     void setupModbusTableWidget();
     void updateSmartReaderSelector();
     void updateSerialPortSelector();

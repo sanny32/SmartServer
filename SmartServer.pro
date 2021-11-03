@@ -69,7 +69,10 @@ DEFINES += APP_DESCRIPTION=\"\\\"$${QMAKE_TARGET_DESCRIPTION}\\\"\"
 DEFINES += APP_COPYRIGHT=\"\\\"$${QMAKE_TARGET_COPYRIGHT}\\\"\"
 
 SOURCES += \
+    application.cpp \
+    applicationbase.cpp \
     applogger.cpp \
+    appsettings.cpp \
     dialogserialportsettings.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -84,7 +87,10 @@ SOURCES += \
     smartcardinfo.cpp
 
 HEADERS += \
+    application.h \
+    applicationbase.h \
     applogger.h \
+    appsettings.h \
     dialogserialportsettings.h \
     mainwindow.h \
     qwaitcursor.h \

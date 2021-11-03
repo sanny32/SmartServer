@@ -8,8 +8,6 @@
 #ifndef QWAITCURSOR_H
 #define QWAITCURSOR_H
 
-#endif // QWAITCURSOR_H
-
 #include <QApplication>
 #include <QWidget>
 
@@ -21,7 +19,7 @@ public:
         _widget = widget;
 
         if(_widget != nullptr)
-        {          
+        {
             _widget->setCursor(Qt::WaitCursor);
         }
         else
@@ -46,6 +44,8 @@ public:
         QApplication::processEvents();
     }
 
-private:   
+private:
     QWidget* _widget;
 };
+
+#endif // QWAITCURSOR_H
