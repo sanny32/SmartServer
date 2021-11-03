@@ -12,6 +12,7 @@
 #include <QAbstractEventDispatcher>
 #include "applogger.h"
 #include "smartcarderror.h"
+#include "dialogserialportsettings.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -89,8 +90,13 @@ void MainWindow::on_smartReaderSelector_currentTextChanged(const QString& text)
 ///
 void MainWindow::on_startAddress_textEdited(const QString& text)
 {
-    Q_UNUSED(text)
-    createRtuModbusServer();
+    bool ok = false;
+    const auto address = text.toShort(&ok);
+
+    if(ok && address > 0)
+    {
+        createRtuModbusServer();
+    }
 }
 
 ///
@@ -99,8 +105,13 @@ void MainWindow::on_startAddress_textEdited(const QString& text)
 ///
 void MainWindow::on_bufferSize_textEdited(const QString& text)
 {
-    Q_UNUSED(text)
-    createRtuModbusServer();
+    bool ok = false;
+    const auto size = text.toShort(&ok);
+
+    if(ok && size > 0)
+    {
+        createRtuModbusServer();
+    }
 }
 
 ///
@@ -124,20 +135,50 @@ void MainWindow::on_serialPortSelector_currentTextChanged(const QString& text)
 }
 
 ///
+/// \brief MainWindow::on_serialPortSettings_clicked
+///
+void MainWindow::on_serialPortSettings_clicked()
+{
+    DialogSerialPortSettings dlg(_serialPotSettings, this);
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        createRtuModbusServer();
+    }
+}
+
+///
 /// \brief MainWindow::on_smartCardDetected
 /// \param smi
 ///
 void MainWindow::on_smartCardDetected(SmartCardInfo smi)
 {
     qInfo().noquote().nospace() << "Обнаружена смарт-карта [" << smi.id().toString() << "]";
-    _rtuModbusServer->addSmartCardInfo(smi);
+    _rtuModbusServer->addSmartCardInfo(smi);   
+}
 
-    const auto id = smi.id().toUInts();
-    for(int i = 0; i < id.size(); i++)
+///
+/// \brief MainWindow::on_rtuModbusServerDataWritten
+/// \param table
+/// \param address
+/// \param size
+///
+void MainWindow::on_rtuModbusServerDataWritten(QModbusDataUnit::RegisterType table, int address, int size)
+{
+    const auto startAddress = ui->startAddress->text().toUShort() - 1;
+    const auto columnCount = ui->modbusTableWidget->columnCount();
+
+    for(int i = 0; i < size; i++)
     {
-        auto item = ui->modbusTableWidget->item(0, i);
-        const auto text = QString("%1H").arg(id[i], 4, 16, QLatin1Char('0'));
-        item->setText(text.toUpper());
+        quint16 data;
+        if(_rtuModbusServer->data(table, address + i, &data))
+        {
+            const int col = (address + i - startAddress) % columnCount;
+            const int row = (address + i - startAddress) / columnCount;
+            const auto text = QString("%1H").arg(data, 4, 16, QLatin1Char('0'));
+
+            auto item = ui->modbusTableWidget->item(row, col);
+            item->setText(text.toUpper());
+        }
     }
 }
 
@@ -190,6 +231,8 @@ void MainWindow::updateSerialPortSelector()
     {
         ui->serialPortSelector->addItem(serialPort.portName());
     }
+
+    ui->serialPortSettings->setEnabled(!serialPorts.isEmpty());
 }
 
 ///
@@ -212,7 +255,6 @@ void MainWindow::setupModbusTableWidget()
     const auto addressType = ui->addressTypeSelector->currentData().value<QModbusDataUnit::RegisterType>();
 
     ui->modbusTableWidget->clear();
-
     ui->modbusTableWidget->setColumnCount(_dataAlignmnet);
     ui->modbusTableWidget->setRowCount(bufferSize);
 
@@ -260,16 +302,17 @@ void MainWindow::createRtuModbusServer()
 {
     _rtuModbusServer = std::make_unique<RtuModbusServer>();
     _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialPortNameParameter, ui->serialPortSelector->currentText());
-    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, 19200);
-    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, QSerialPort::Data8);
-    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::NoParity);
-    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, QSerialPort::OneStop);
+    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, _serialPotSettings.baudRate());
+    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, _serialPotSettings.dataBits());
+    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialParityParameter, _serialPotSettings.parity());
+    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, _serialPotSettings.stopBits());
 
     const auto startAddress = ui->startAddress->text().toUShort();
     const auto bufferSize = ui->bufferSize->text().toUShort();
     const auto addressType = ui->addressTypeSelector->currentData().value<QModbusDataUnit::RegisterType>();
     _rtuModbusServer->createRegisters(addressType, startAddress - 1, bufferSize * _dataAlignmnet, _dataAlignmnet);
 
+    connect(_rtuModbusServer.get(), &RtuModbusServer::dataWritten, this, &MainWindow::on_rtuModbusServerDataWritten);
     _rtuModbusServer->connectDevice();
 
     setupModbusTableWidget();

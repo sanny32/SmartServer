@@ -31,7 +31,7 @@ public:
 
 private slots:
     void on_stateChanged(QModbusDevice::State state);
-    void on_dataWritten(QModbusDataUnit::RegisterType table, int address, int size);
+    void on_errorOccurred(QModbusDevice::Error error);
 
 private:    
     std::unique_ptr<RtuModbusDataBuffer> _buffer;

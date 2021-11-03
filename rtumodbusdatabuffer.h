@@ -51,7 +51,8 @@ public:
 
 private:
     quint8 _alignment;
-    quint16 _currentAddress;
+    quint16 _startAddress;
+    quint16 _nextAddress;
     quint16 _bufferSize;
     QModbusDataUnitMap _reg;
     QModbusDataUnit::RegisterType _regType;

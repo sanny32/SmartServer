@@ -14,8 +14,8 @@
 ///
 RtuModbusServer::RtuModbusServer()
 {
-    connect(this, &RtuModbusServer::stateChanged, this, &RtuModbusServer::on_stateChanged);
-    connect(this, &RtuModbusServer::dataWritten, this,  &RtuModbusServer::on_dataWritten);
+    connect(this, &RtuModbusServer::stateChanged, this, &RtuModbusServer::on_stateChanged);    
+    connect(this, &RtuModbusServer::errorOccurred, this, &RtuModbusServer::on_errorOccurred);
 }
 
 ///
@@ -32,10 +32,15 @@ RtuModbusServer::~RtuModbusServer()
 ///
 void RtuModbusServer::addSmartCardInfo(const SmartCardInfo& smi)
 {
+    if(_buffer == nullptr)
+    {
+        return;
+    }
+
     const auto id = smi.id().toUInts();
     const auto address = _buffer->nextAddress();
     for(int i = 0; i < id.size(); i++)
-    {        
+    {                
         setData(_buffer->registerType(), address + i, id[i]);
     }
 }
@@ -60,16 +65,10 @@ void RtuModbusServer::createRegisters(QModbusDataUnit::RegisterType type, quint1
 ///
 void RtuModbusServer::on_stateChanged(QModbusDevice::State state)
 {
-    //qDebug() << state;
+    Q_UNUSED(state)
 }
 
-///
-/// \brief RtuModbusServer::on_dataWritten
-/// \param table
-/// \param address
-/// \param size
-///
-void RtuModbusServer::on_dataWritten(QModbusDataUnit::RegisterType table, int address, int size)
+void RtuModbusServer::on_errorOccurred(QModbusDevice::Error error)
 {
-    //qDebug() << table << address << size;
+    qDebug() << error;
 }

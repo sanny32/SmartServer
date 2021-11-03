@@ -70,12 +70,14 @@ DEFINES += APP_COPYRIGHT=\"\\\"$${QMAKE_TARGET_COPYRIGHT}\\\"\"
 
 SOURCES += \
     applogger.cpp \
+    dialogserialportsettings.cpp \
     main.cpp \
     mainwindow.cpp \
     rtumodbusdatabuffer.cpp \
     rtumodbusserver.cpp \
     scc_getfirmware.cpp \
     scc_getid.cpp \
+    serialportsettings.cpp \
     smartcardcommand.cpp \
     smartcarddevice.cpp \
     smartcarderror.cpp \
@@ -83,18 +85,21 @@ SOURCES += \
 
 HEADERS += \
     applogger.h \
+    dialogserialportsettings.h \
     mainwindow.h \
     qwaitcursor.h \
     rtumodbusdatabuffer.h \
     rtumodbusserver.h \
     scc_getfirmware.h \
     scc_getid.h \
+    serialportsettings.h \
     smartcardcommand.h \
     smartcarddevice.h \
     smartcarderror.h \
     smartcardinfo.h
 
 FORMS += \
+    dialogserialportsettings.ui \
     mainwindow.ui
 
 RESOURCES += \
