@@ -50,7 +50,7 @@ private:
     Ui::MainWindow *ui;
     SCARDCONTEXT _hContext;
 
-    SerialPortSettings _serialPotSettings;
+    QMap<QString, SerialPortSettings> _serialPortsSettings;
     const quint8 _dataAlignmnet = 2; // выравнивание данных (размер ID смарт-карты в регистрах)
     std::unique_ptr<SmartCardDevice> _smartCardDevice;
     std::unique_ptr<RtuModbusServer> _rtuModbusServer;

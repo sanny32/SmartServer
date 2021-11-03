@@ -139,7 +139,8 @@ void MainWindow::on_serialPortSelector_currentTextChanged(const QString& text)
 ///
 void MainWindow::on_serialPortSettings_clicked()
 {
-    DialogSerialPortSettings dlg(_serialPotSettings, this);
+    const auto portName = ui->serialPortSelector->currentText();
+    DialogSerialPortSettings dlg(_serialPortsSettings[portName], this);
     if(dlg.exec() == QDialog::Accepted)
     {
         createRtuModbusServer();
@@ -300,20 +301,25 @@ void MainWindow::setupModbusTableWidget()
 ///
 void MainWindow::createRtuModbusServer()
 {
-    _rtuModbusServer = std::make_unique<RtuModbusServer>();
-    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialPortNameParameter, ui->serialPortSelector->currentText());
-    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, _serialPotSettings.baudRate());
-    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, _serialPotSettings.dataBits());
-    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialParityParameter, _serialPotSettings.parity());
-    _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, _serialPotSettings.stopBits());
+    const auto portName = ui->serialPortSelector->currentText();
+    if(!portName.isEmpty())
+    {
+        const auto serialPortSettings = _serialPortsSettings[portName];
+        _rtuModbusServer = std::make_unique<RtuModbusServer>();
+        _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialPortNameParameter, portName);
+        _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, serialPortSettings.baudRate());
+        _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, serialPortSettings.dataBits());
+        _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialParityParameter, serialPortSettings.parity());
+        _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, serialPortSettings.stopBits());
 
-    const auto startAddress = ui->startAddress->text().toUShort();
-    const auto bufferSize = ui->bufferSize->text().toUShort();
-    const auto addressType = ui->addressTypeSelector->currentData().value<QModbusDataUnit::RegisterType>();
-    _rtuModbusServer->createRegisters(addressType, startAddress - 1, bufferSize * _dataAlignmnet, _dataAlignmnet);
+        const auto startAddress = ui->startAddress->text().toUShort();
+        const auto bufferSize = ui->bufferSize->text().toUShort();
+        const auto addressType = ui->addressTypeSelector->currentData().value<QModbusDataUnit::RegisterType>();
+        _rtuModbusServer->createRegisters(addressType, startAddress - 1, bufferSize * _dataAlignmnet, _dataAlignmnet);
 
-    connect(_rtuModbusServer.get(), &RtuModbusServer::dataWritten, this, &MainWindow::on_rtuModbusServerDataWritten);
-    _rtuModbusServer->connectDevice();
+        connect(_rtuModbusServer.get(), &RtuModbusServer::dataWritten, this, &MainWindow::on_rtuModbusServerDataWritten);
+        _rtuModbusServer->connectDevice();
 
-    setupModbusTableWidget();
+        setupModbusTableWidget();
+    }
 }

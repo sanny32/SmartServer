@@ -68,7 +68,11 @@ void RtuModbusServer::on_stateChanged(QModbusDevice::State state)
     Q_UNUSED(state)
 }
 
+///
+/// \brief RtuModbusServer::on_errorOccurred
+/// \param error
+///
 void RtuModbusServer::on_errorOccurred(QModbusDevice::Error error)
 {
-    qDebug() << error;
+    qWarning() << "Ошибка Modbus RTU сервера" << error;
 }
