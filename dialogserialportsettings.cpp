@@ -21,6 +21,10 @@ DialogSerialPortSettings::DialogSerialPortSettings(SerialPortSettings& settings,
 {
     ui->setupUi(this);
 
+    setWindowFlags(Qt::Dialog |
+                       Qt::WindowTitleHint |
+                       Qt::WindowCloseButtonHint);
+
     ui->baudRateSelector->addItem("1200", QSerialPort::Baud1200);
     ui->baudRateSelector->addItem("2400", QSerialPort::Baud2400);
     ui->baudRateSelector->addItem("4800", QSerialPort::Baud4800);
@@ -35,13 +39,13 @@ DialogSerialPortSettings::DialogSerialPortSettings(SerialPortSettings& settings,
     ui->dataBitsSelector->addItem("7", QSerialPort::Data7);
     ui->dataBitsSelector->addItem("8", QSerialPort::Data8);
 
-    ui->paritySelector->addItem("NONE", QSerialPort::NoParity);
-    ui->paritySelector->addItem("EVEN", QSerialPort::EvenParity);
-    ui->paritySelector->addItem("ODD", QSerialPort::OddParity);
+    ui->paritySelector->addItem("None", QSerialPort::NoParity);
+    ui->paritySelector->addItem("Even", QSerialPort::EvenParity);
+    ui->paritySelector->addItem("Odd", QSerialPort::OddParity);
 
     ui->stopBitsSelector->addItem("1", QSerialPort::OneStop);
+    ui->stopBitsSelector->addItem("1.5", QSerialPort::OneAndHalfStop);
     ui->stopBitsSelector->addItem("2", QSerialPort::TwoStop);
-    ui->stopBitsSelector->addItem("3", QSerialPort::OneAndHalfStop);
 
     int idx = ui->baudRateSelector->findData(settings.baudRate());
     ui->baudRateSelector->setCurrentIndex(idx);
@@ -73,5 +77,5 @@ void DialogSerialPortSettings::accept()
     _settings.setDataBits(ui->dataBitsSelector->currentData().value<QSerialPort::DataBits>());
     _settings.setParity(ui->paritySelector->currentData().value<QSerialPort::Parity>());
     _settings.setStopBits(ui->stopBitsSelector->currentData().value<QSerialPort::StopBits>());
-    close();
+    QDialog::accept();
 }
