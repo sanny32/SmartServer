@@ -13,6 +13,9 @@
 
 int main(int argc, char *argv[])
 {
+    // отключаем логирование qt.modbus
+    QLoggingCategory::setFilterRules("qt.modbus* = false");
+
     Application::setOrganizationName(TARGET_COMPANY);
     Application::setOrganizationDomain(TARGET_DOMAIN);
     Application::setApplicationVersion(APP_VERSION);

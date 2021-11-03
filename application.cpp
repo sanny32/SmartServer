@@ -22,9 +22,7 @@ Application::Application(int &argc, char **argv)
     :QApplication(argc, argv)
     ,ApplicationBase(argc, argv)
 
-{   
-    setAttribute(Qt::AA_EnableHighDpiScaling);
-    setAttribute(Qt::AA_UseHighDpiPixmaps);   
+{      
 }
 
 ///

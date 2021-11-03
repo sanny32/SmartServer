@@ -36,7 +36,7 @@ public:
     /// \param app
     /// \param listWidget
     ///
-    void setup(const QApplication& app, QListWidget* listWidget);
+    void setup(const QApplication& app, QListWidget* listWidget, int maxRows = 500);
 
     ///
     /// \brief hello
@@ -54,6 +54,7 @@ private:
 private:
     QFile _logFile;
     QString _filename;
+    int _maxRows;
     QListWidget* _listWidget;
 
     static std::mutex mutex;

@@ -67,8 +67,9 @@ void AppLogger::setup(const QApplication& app, const QString filename)
 /// \param app
 /// \param listWidget
 ///
-void AppLogger::setup(const QApplication& app, QListWidget* listWidget)
+void AppLogger::setup(const QApplication& app, QListWidget* listWidget, int maxRows)
 {
+    _maxRows = maxRows;
     _listWidget = listWidget;
     qInstallMessageHandler(AppLogger::listWidgetHandler);
 
@@ -163,7 +164,7 @@ void AppLogger::fileHandler(QtMsgType type, const QMessageLogContext& ctx, const
         if(logFile.isOpen())
         {
             QTextStream ts(&logFile);
-            ts << text << endl;
+            ts << text << "\n";
         }
     }
 }
@@ -204,5 +205,10 @@ void AppLogger::listWidgetHandler(QtMsgType type, const QMessageLogContext& ctx,
     }
 
     AppLogger::getInstance()._listWidget->addItem(text);
+    if(AppLogger::getInstance()._listWidget->count() > AppLogger::getInstance()._maxRows)
+    {
+        auto item = AppLogger::getInstance()._listWidget->takeItem(0);
+        delete item;
+    }
     AppLogger::getInstance()._listWidget->scrollToBottom();
 }
