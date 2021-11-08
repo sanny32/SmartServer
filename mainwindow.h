@@ -30,7 +30,9 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
 
-private slots:   
+private slots:
+    void on_actionExit_triggered();
+    void on_actionAbout_triggered();
     void on_smartCardDetected(SmartCardInfo smi);
     void on_rtuModbusServerStateChanged(QModbusDevice::State state);
     void on_rtuModbusServerErrorOccurred(QModbusDevice::Error error);

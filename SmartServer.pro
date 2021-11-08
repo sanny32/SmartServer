@@ -73,6 +73,7 @@ SOURCES += \
     applicationbase.cpp \
     applogger.cpp \
     appsettings.cpp \
+    dialogabout.cpp \
     dialogserialportsettings.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -91,6 +92,7 @@ HEADERS += \
     applicationbase.h \
     applogger.h \
     appsettings.h \
+    dialogabout.h \
     dialogserialportsettings.h \
     mainwindow.h \
     qwaitcursor.h \
@@ -105,6 +107,7 @@ HEADERS += \
     smartcardinfo.h
 
 FORMS += \
+    dialogabout.ui \
     dialogserialportsettings.ui \
     mainwindow.ui
 

@@ -13,6 +13,7 @@
 #include "applogger.h"
 #include "appsettings.h"
 #include "smartcarderror.h"
+#include "dialogabout.h"
 #include "dialogserialportsettings.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -50,6 +51,23 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     saveSettings();
     QMainWindow::closeEvent(event);
+}
+
+///
+/// \brief MainWindow::on_actionExit_triggered
+///
+void MainWindow::on_actionExit_triggered()
+{
+    close();
+}
+
+///
+/// \brief MainWindow::on_actionAbout_triggered
+///
+void MainWindow::on_actionAbout_triggered()
+{
+    DialogAbout dlg(this);
+    dlg.exec();
 }
 
 ///
