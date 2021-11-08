@@ -18,7 +18,7 @@ GIT_BRANCH = $$system(git --git-dir $$PWD/.git rev-parse --abbrev-ref HEAD)
 BUILD_NUMBER = $$system(git --git-dir $$PWD/.git rev-list main --count)
 QMAKE_TARGET_COMPANY = "JSC Nefteavtomatika"
 QMAKE_TARGET_PRODUCT = SmartServer
-QMAKE_TARGET_DESCRIPTION = "Modbus RTU server fro smart cards"
+QMAKE_TARGET_DESCRIPTION = "Modbus RTU server for smart cards"
 QMAKE_TARGET_COPYRIGHT = "Copyright (c) 2021 JSC Nefteavtomatika"
 QMAKE_TARGET_DOMAIN = "nefteavtomatika.ru"
 

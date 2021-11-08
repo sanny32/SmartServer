@@ -30,10 +30,11 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
 
-private slots:
-    void on_awake();
+private slots:   
     void on_smartCardDetected(SmartCardInfo smi);
-    void on_rtuModbusServerDataWritten(QModbusDataUnit::RegisterType table, int address, int size);
+    void on_rtuModbusServerStateChanged(QModbusDevice::State state);
+    void on_rtuModbusServerErrorOccurred(QModbusDevice::Error error);
+    void on_rtuModbusServerDataWritten(QModbusDataUnit::RegisterType table, int address, int size);   
     void on_refreshSmartReaders_clicked();
     void on_startAddress_textEdited(const QString& text);
     void on_bufferSize_textEdited(const QString& text);

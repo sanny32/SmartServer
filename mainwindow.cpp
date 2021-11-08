@@ -29,10 +29,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     AppLogger::getInstance().setup(*qApp, ui->logWidget);
 
-    // событие, генерируемое при бездействии основного GUI-потока приложения
-    auto dispatcher = QAbstractEventDispatcher::instance();
-    connect(dispatcher, SIGNAL(awake()), this, SLOT(on_awake()));
-
     updateSmartReaderSelector();
     updateSerialPortSelector();
     updateAddressTypeSelector();
@@ -54,13 +50,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     saveSettings();
     QMainWindow::closeEvent(event);
-}
-
-///
-/// \brief MainWindow::on_awake
-///
-void MainWindow::on_awake()
-{
 }
 
 ///
@@ -155,6 +144,44 @@ void MainWindow::on_smartCardDetected(SmartCardInfo smi)
 }
 
 ///
+/// \brief MainWindow::on_rtuModbusServerStateChanged
+/// \param state
+///
+void MainWindow::on_rtuModbusServerStateChanged(QModbusDevice::State state)
+{
+    QString modbusState;
+    switch(state)
+    {
+        case QModbusDevice::ConnectingState:
+            modbusState = "Запуск...";
+        break;
+
+        case QModbusDevice::ConnectedState:
+            modbusState = "Запущен";
+        break;
+
+        case QModbusDevice::UnconnectedState:
+            modbusState = "Остановлен";
+        break;
+
+        case QModbusDevice::ClosingState:
+            modbusState = "Останов...";
+        break;
+    }
+
+    ui->statusbar->showMessage(QString("Modbus RTU сервер: %1").arg(modbusState));
+}
+
+///
+/// \brief MainWindow::on_rtuModbusServerErrorOccurred
+/// \param error
+///
+void MainWindow::on_rtuModbusServerErrorOccurred(QModbusDevice::Error error)
+{
+    qWarning() << "Ошибка Modbus RTU сервера:" << error;
+}
+
+///
 /// \brief MainWindow::on_rtuModbusServerDataWritten
 /// \param table
 /// \param address
@@ -188,7 +215,7 @@ void MainWindow::loadSettings()
     const auto smartCardReader = AppSettings::instance()->GetSetting(AppSettings::SmartCardReader).toString();
     ui->smartReaderSelector->setCurrentText(smartCardReader);
 
-    const auto serialPortSettings = AppSettings::instance()->GetSetting(AppSettings::SerialPortSettings).value<SerialPortSettings>();
+    const auto serialPortSettings = AppSettings::instance()->GetSetting(AppSettings::SerialPortSettings).value<SerialPortSettings>();    
     if(!serialPortSettings.name().isEmpty())
     {
         _serialPortsSettings[serialPortSettings.name()] = serialPortSettings;
@@ -385,7 +412,12 @@ void MainWindow::createRtuModbusServer()
         _rtuModbusServer->createRegisters(addressType, startAddress - 1, bufferSize * _dataAlignmnet, _dataAlignmnet);
 
         connect(_rtuModbusServer.get(), &RtuModbusServer::dataWritten, this, &MainWindow::on_rtuModbusServerDataWritten);
-        _rtuModbusServer->connectDevice();
+        connect(_rtuModbusServer.get(), &RtuModbusServer::stateChanged, this, &MainWindow::on_rtuModbusServerStateChanged);
+        connect(_rtuModbusServer.get(), &RtuModbusServer::errorOccurred, this, &MainWindow::on_rtuModbusServerErrorOccurred);
+        if(!_rtuModbusServer->connectDevice())
+        {
+
+        }
 
         setupModbusTableWidget();
     }

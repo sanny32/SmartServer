@@ -13,9 +13,7 @@
 /// \brief RtuModbusServer::RtuModbusServer
 ///
 RtuModbusServer::RtuModbusServer()
-{
-    connect(this, &RtuModbusServer::stateChanged, this, &RtuModbusServer::on_stateChanged);    
-    connect(this, &RtuModbusServer::errorOccurred, this, &RtuModbusServer::on_errorOccurred);
+{  
 }
 
 ///
@@ -57,22 +55,4 @@ void RtuModbusServer::createRegisters(QModbusDataUnit::RegisterType type, quint1
     _buffer = std::make_unique<RtuModbusDataBuffer>(type, start, count);
     _buffer->setDataAlignment(alignment);
     setMap(_buffer->getModbusDataUnitMap());
-}
-
-///
-/// \brief RtuModbusServer::on_stateChanged
-/// \param state
-///
-void RtuModbusServer::on_stateChanged(QModbusDevice::State state)
-{
-    Q_UNUSED(state)
-}
-
-///
-/// \brief RtuModbusServer::on_errorOccurred
-/// \param error
-///
-void RtuModbusServer::on_errorOccurred(QModbusDevice::Error error)
-{
-    qWarning() << "Ошибка Modbus RTU сервера" << error;
 }

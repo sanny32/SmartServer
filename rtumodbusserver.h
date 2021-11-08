@@ -9,6 +9,7 @@
 #ifndef RTUMODBUSSERVER_H
 #define RTUMODBUSSERVER_H
 
+#include <memory>
 #include <QSerialPort>
 #include <QModbusRtuSerialSlave>
 #include <QObject>
@@ -26,12 +27,20 @@ public:
     RtuModbusServer();
     virtual ~RtuModbusServer();
 
+    ///
+    /// \brief Добавление информации о смарт-карте в регистры Modbus RTU
+    /// \param smi
+    ///
     void addSmartCardInfo(const SmartCardInfo& smi);
-    void createRegisters(QModbusDataUnit::RegisterType type, quint16 start, quint16 count, quint8 alignment = 1);
 
-private slots:
-    void on_stateChanged(QModbusDevice::State state);
-    void on_errorOccurred(QModbusDevice::Error error);
+    ///
+    /// \brief Создение адресного пространства Modbus RTU сервера
+    /// \param type - тип регистров (3x, 4x)
+    /// \param start - начальный адрес (начиная с 0)
+    /// \param count - количество регистров
+    /// \param alignment - выравнивание (количество регистров, кторое занимает ID смарт-карты)
+    ///
+    void createRegisters(QModbusDataUnit::RegisterType type, quint16 start, quint16 count, quint8 alignment = 1);
 
 private:    
     std::unique_ptr<RtuModbusDataBuffer> _buffer;
