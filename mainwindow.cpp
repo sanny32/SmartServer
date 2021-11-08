@@ -197,6 +197,10 @@ void MainWindow::on_rtuModbusServerStateChanged(QModbusDevice::State state)
 void MainWindow::on_rtuModbusServerErrorOccurred(QModbusDevice::Error error)
 {
     qWarning() << "Ошибка Modbus RTU сервера:" << error;
+    if(error == QModbusDevice::ConnectionError)
+    {
+        _rtuModbusServer->disconnectDevice();
+    }
 }
 
 ///
@@ -432,10 +436,7 @@ void MainWindow::createRtuModbusServer()
         connect(_rtuModbusServer.get(), &RtuModbusServer::dataWritten, this, &MainWindow::on_rtuModbusServerDataWritten);
         connect(_rtuModbusServer.get(), &RtuModbusServer::stateChanged, this, &MainWindow::on_rtuModbusServerStateChanged);
         connect(_rtuModbusServer.get(), &RtuModbusServer::errorOccurred, this, &MainWindow::on_rtuModbusServerErrorOccurred);
-        if(!_rtuModbusServer->connectDevice())
-        {
-
-        }
+        _rtuModbusServer->connectDevice();
 
         setupModbusTableWidget();
     }
