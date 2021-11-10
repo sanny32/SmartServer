@@ -22,8 +22,10 @@ SerialPortSettings::SerialPortSettings(const QString& name)
     static const int reg = qRegisterMetaType<SerialPortSettings>();
     Q_UNUSED(reg)
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     static const int regOps = qRegisterMetaTypeStreamOperators<SerialPortSettings>();
     Q_UNUSED(regOps)
+#endif
 }
 
 ///

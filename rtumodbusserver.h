@@ -11,15 +11,22 @@
 
 #include <memory>
 #include <QSerialPort>
-#include <QModbusRtuSerialSlave>
 #include <QObject>
 #include "smartcardinfo.h"
 #include "rtumodbusdatabuffer.h"
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    #include <QModbusRtuSerialSlave>
+    typedef QModbusRtuSerialSlave QModbusRtuSerialServer;
+#else
+    #include <QModbusRtuSerialServer>
+#endif
+
+
 ///
 /// \brief The RtuModbusServer class
 ///
-class RtuModbusServer : public QModbusRtuSerialSlave
+class RtuModbusServer : public QModbusRtuSerialServer
 {
     Q_OBJECT
 
