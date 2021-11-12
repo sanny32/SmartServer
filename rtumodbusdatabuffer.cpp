@@ -17,7 +17,7 @@
 RtuModbusDataBuffer::RtuModbusDataBuffer(QModbusDataUnit::RegisterType type, quint16 startAddress, quint16 bufferSize)
     :_alignment(1)
     ,_startAddress(startAddress)
-    ,_nextAddress(startAddress)
+    ,_nextAddress(startAddress + 2)
     ,_bufferSize(bufferSize)
     ,_regType(type)
 {
@@ -52,6 +52,15 @@ void RtuModbusDataBuffer::setDataAlignment(quint8 alignment)
 }
 
 ///
+/// \brief RtuModbusDataBuffer::startAddress
+/// \return
+///
+quint16 RtuModbusDataBuffer::startAddress() const
+{
+    return _startAddress;
+}
+
+///
 /// \brief RtuModbusDataBuffer::nextAddress
 /// \return
 ///
@@ -59,10 +68,10 @@ quint16 RtuModbusDataBuffer::nextAddress()
 {
     const auto nextAddress = _nextAddress;
 
-    _nextAddress += _alignment;
+    _nextAddress += _alignment; 
     if(_nextAddress >= _startAddress + _bufferSize)
     {
-        _nextAddress = _startAddress;
+        _nextAddress = _startAddress + 2;
     }
 
     return nextAddress;

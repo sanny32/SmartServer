@@ -41,6 +41,8 @@ void RtuModbusServer::addSmartCardInfo(const SmartCardInfo& smi)
     {                
         setData(_buffer->registerType(), address + i, id[i]);
     }
+
+    setData(_buffer->registerType(), _buffer->startAddress(), address + 1);
 }
 
 ///

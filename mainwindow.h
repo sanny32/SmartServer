@@ -44,6 +44,7 @@ private slots:
     void on_addressTypeSelector_currentIndexChanged(int index);
     void on_serialPortSelector_currentTextChanged(const QString& text);
     void on_smartReaderSelector_currentTextChanged(const QString& text);
+    void on_useSmartReaderEmulator_stateChanged(int state);
 
 private:
     void loadSettings();

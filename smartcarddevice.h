@@ -20,7 +20,6 @@ public:
     explicit SmartCardDevice(SCARDCONTEXT hContext, const QString& name, QObject *parent = nullptr);
     virtual ~SmartCardDevice();
 
-
 signals:
     void smartCardDetected(SmartCardInfo smi);
 

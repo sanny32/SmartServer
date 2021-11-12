@@ -13,6 +13,7 @@
 #include "applogger.h"
 #include "appsettings.h"
 #include "smartcarderror.h"
+#include "smartcarddeviceemulator.h"
 #include "dialogabout.h"
 #include "dialogserialportsettings.h"
 #include "mainwindow.h"
@@ -84,8 +85,36 @@ void MainWindow::on_refreshSmartReaders_clicked()
 ///
 void MainWindow::on_smartReaderSelector_currentTextChanged(const QString& text)
 {
-    _smartCardDevice = std::make_unique<SmartCardDevice>(_hContext, text);
-    connect(_smartCardDevice.get(), &SmartCardDevice::smartCardDetected, this, &MainWindow::on_smartCardDetected);
+    if(_hContext != 0)
+    {
+        _smartCardDevice = std::make_unique<SmartCardDevice>(_hContext, text);
+        connect(_smartCardDevice.get(), &SmartCardDevice::smartCardDetected, this, &MainWindow::on_smartCardDetected);
+    }
+}
+
+///
+/// \brief MainWindow::on_useSmartReaderEmulator_stateChanged
+/// \param state
+///
+void MainWindow::on_useSmartReaderEmulator_stateChanged(int state)
+{
+    if(state)
+    {
+        ui->smartReaderSelector->clear();
+        ui->smartReaderSelector->addItem("Smart Card Device Emulator");
+        ui->smartReaderSelector->setEnabled(false);
+        ui->refreshSmartReaders->setEnabled(false);
+
+        _smartCardDevice = std::make_unique<SmartCardDeviceEmulator>(2000);
+        connect(_smartCardDevice.get(), &SmartCardDevice::smartCardDetected, this, &MainWindow::on_smartCardDetected);
+    }
+    else
+    {
+        _smartCardDevice = nullptr;
+        ui->smartReaderSelector->setEnabled(true);
+        ui->refreshSmartReaders->setEnabled(true);
+        updateSmartReaderSelector();
+    }
 }
 
 ///
@@ -326,7 +355,7 @@ void MainWindow::updateSmartReaderSelector()
     }
     catch(std::exception& ex)
     {
-        qCritical().noquote() << ex.what();
+        qCritical().noquote() << ex.what();        
     }
 }
 
@@ -373,7 +402,7 @@ void MainWindow::setupModbusTableWidget()
 
     ui->modbusTableWidget->clear();
     ui->modbusTableWidget->setColumnCount(_dataAlignmnet);
-    ui->modbusTableWidget->setRowCount(bufferSize);
+    ui->modbusTableWidget->setRowCount(bufferSize + 1);
 
     for(int i = 0; i < ui->modbusTableWidget->columnCount(); i++)
     {
@@ -431,7 +460,7 @@ void MainWindow::createRtuModbusServer()
         const auto startAddress = ui->startAddress->text().toUShort();
         const auto bufferSize = ui->bufferSize->text().toUShort();
         const auto addressType = ui->addressTypeSelector->currentData().value<QModbusDataUnit::RegisterType>();
-        _rtuModbusServer->createRegisters(addressType, startAddress - 1, bufferSize * _dataAlignmnet, _dataAlignmnet);
+        _rtuModbusServer->createRegisters(addressType, startAddress - 1, bufferSize * _dataAlignmnet + 2, _dataAlignmnet);
 
         connect(_rtuModbusServer.get(), &RtuModbusServer::dataWritten, this, &MainWindow::on_rtuModbusServerDataWritten);
         connect(_rtuModbusServer.get(), &RtuModbusServer::stateChanged, this, &MainWindow::on_rtuModbusServerStateChanged);

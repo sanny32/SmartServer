@@ -38,10 +38,16 @@ public:
     void setDataAlignment(quint8 alignment);
 
     ///
+    /// \brief начальный адрес карты регистров
+    /// \return
+    ///
+    quint16 startAddress() const;
+
+    ///
     /// \brief возвращает следующий адрес для записи
     /// \return
     ///
-    quint16 nextAddress();
+    quint16 nextAddress();   
 
     ///
     /// \brief возвращает тип регистров в карте Modbus
@@ -52,7 +58,7 @@ public:
 private:
     quint8 _alignment;
     quint16 _startAddress;
-    quint16 _nextAddress;
+    quint16 _nextAddress;   
     quint16 _bufferSize;
     QModbusDataUnitMap _reg;
     QModbusDataUnit::RegisterType _regType;
