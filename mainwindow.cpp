@@ -31,6 +31,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     AppLogger::getInstance().setup(*qApp, ui->logWidget);
 
+    // настройка валидаторов ввода данных
+    ui->startAddress->setValidator(new QIntValidator(1, 10000, this));
+    ui->bufferSize->setValidator(new QIntValidator(1, 100, this));
+
     updateSmartReaderSelector();
     updateSerialPortSelector();
     updateAddressTypeSelector();
@@ -111,9 +115,14 @@ void MainWindow::on_useSmartReaderEmulator_stateChanged(int state)
     else
     {
         _smartCardDevice = nullptr;
+
         ui->smartReaderSelector->setEnabled(true);
         ui->refreshSmartReaders->setEnabled(true);
+
         updateSmartReaderSelector();
+
+        const auto smartCardReader = AppSettings::instance()->GetSetting(AppSettings::SmartCardReader).toString();
+        ui->smartReaderSelector->setCurrentText(smartCardReader);
     }
 }
 
