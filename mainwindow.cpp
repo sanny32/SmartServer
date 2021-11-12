@@ -194,9 +194,12 @@ void MainWindow::on_serialPortSettings_clicked()
 /// \param smi
 ///
 void MainWindow::on_smartCardDetected(SmartCardInfo smi)
-{
+{    
     qInfo().noquote().nospace() << "Обнаружена смарт-карта [" << smi.id().toString() << "]";
-    _rtuModbusServer->addSmartCardInfo(smi);   
+    if(_rtuModbusServer != nullptr)
+    {
+        _rtuModbusServer->addSmartCardInfo(smi);
+    }
 }
 
 ///
