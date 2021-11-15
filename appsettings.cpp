@@ -17,6 +17,7 @@ const Setting AppSettings::SerialPortSettings =     { "SerialPortSettings",     
 const Setting AppSettings::ModbusAddressType =      { "ModbusAddressType",        QString()    };
 const Setting AppSettings::ModbusStartAddress =     { "ModbusStartAddress",       1            };
 const Setting AppSettings::ModbusBufferSize =       { "ModbusBufferSize",         5            };
+const Setting AppSettings::ModbusServerAddress =    { "ModbusServerAddress",      1            };
 
 //
 /// \brief AppSettings::instance

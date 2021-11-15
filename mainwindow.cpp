@@ -190,6 +190,15 @@ void MainWindow::on_serialPortSettings_clicked()
 }
 
 ///
+/// \brief MainWindow::on_serverAddress_valueChanged
+/// \param value
+///
+void MainWindow::on_serverAddress_valueChanged(int value)
+{
+    createRtuModbusServer();
+}
+
+///
 /// \brief MainWindow::on_smartCardDetected
 /// \param smi
 ///
@@ -294,6 +303,9 @@ void MainWindow::loadSettings()
     const auto modbusBufferSize = AppSettings::instance()->GetSetting(AppSettings::ModbusBufferSize).toUInt();
     ui->bufferSize->setText(QString::number(modbusBufferSize));
 
+    const auto serverAddress = AppSettings::instance()->GetSetting(AppSettings::ModbusServerAddress).toUInt();
+    ui->serverAddress->setValue(serverAddress);
+
     createRtuModbusServer();
 }
 
@@ -320,6 +332,9 @@ void MainWindow::saveSettings()
 
     const auto modbusBufferSize = ui->bufferSize->text();
     AppSettings::instance()->SetSetting(AppSettings::ModbusBufferSize, modbusBufferSize);
+
+    const auto serverAddress = ui->serverAddress->value();
+    AppSettings::instance()->SetSetting(AppSettings::ModbusServerAddress, serverAddress);
 }
 
 ///
@@ -463,6 +478,7 @@ void MainWindow::createRtuModbusServer()
     {
         const auto serialPortSettings = _serialPortsSettings[portName];
         _rtuModbusServer = std::make_unique<RtuModbusServer>();
+        _rtuModbusServer->setServerAddress(ui->serverAddress->value());
         _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialPortNameParameter, portName);
         _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, serialPortSettings.baudRate());
         _rtuModbusServer->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, serialPortSettings.dataBits());

@@ -30,6 +30,7 @@ public:
     static const Setting ModbusAddressType;
     static const Setting ModbusStartAddress;
     static const Setting ModbusBufferSize;
+    static const Setting ModbusServerAddress;
 
 public:
     static AppSettings* instance();

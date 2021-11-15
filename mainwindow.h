@@ -41,6 +41,7 @@ private slots:
     void on_startAddress_textEdited(const QString& text);
     void on_bufferSize_textEdited(const QString& text);
     void on_serialPortSettings_clicked();
+    void on_serverAddress_valueChanged(int value);
     void on_addressTypeSelector_currentIndexChanged(int index);
     void on_serialPortSelector_currentTextChanged(const QString& text);
     void on_smartReaderSelector_currentTextChanged(const QString& text);
