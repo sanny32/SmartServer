@@ -12,7 +12,7 @@ QT       += core gui widgets serialbus serialport
 TARGET = SmartServer
 TEMPLATE = app
 
-VERSION_NUMBER = 0.0.2
+VERSION_NUMBER = 0.0.3
 GIT_REVISION = $$system(git --git-dir $$PWD/.git log --format="%h" -n 1)
 GIT_BRANCH = $$system(git --git-dir $$PWD/.git rev-parse --abbrev-ref HEAD)
 BUILD_NUMBER = $$system(git --git-dir $$PWD/.git rev-list main --count)
