@@ -195,6 +195,7 @@ void MainWindow::on_serialPortSettings_clicked()
 ///
 void MainWindow::on_serverAddress_valueChanged(int value)
 {
+    Q_UNUSED(value)
     createRtuModbusServer();
 }
 
