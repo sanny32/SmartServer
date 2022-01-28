@@ -31,6 +31,7 @@ public:
     static const Setting ModbusStartAddress;
     static const Setting ModbusBufferSize;
     static const Setting ModbusServerAddress;
+    static const Setting ModbusServerRestartTimeout;
 
 public:
     static AppSettings* instance();

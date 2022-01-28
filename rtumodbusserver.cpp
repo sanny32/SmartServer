@@ -13,7 +13,10 @@
 /// \brief RtuModbusServer::RtuModbusServer
 ///
 RtuModbusServer::RtuModbusServer()
-{  
+    :_restartTimeout(0)
+    ,_lastRequestTime(QDateTime::currentDateTime().toSecsSinceEpoch())
+{
+    connect(&_restartTimer, &QTimer::timeout, this, &RtuModbusServer::on_timeout);
 }
 
 ///
@@ -57,4 +60,54 @@ void RtuModbusServer::createRegisters(QModbusDataUnit::RegisterType type, quint1
     _buffer = std::make_unique<RtuModbusDataBuffer>(type, start, count);
     _buffer->setDataAlignment(alignment);
     setMap(_buffer->getModbusDataUnitMap());
+}
+
+///
+/// \brief RtuModbusServer::restartTimeout
+/// \return
+///
+int RtuModbusServer::restartTimeout() const
+{
+    return _restartTimeout;
+}
+
+///
+/// \brief RtuModbusServer::setRestartTimeout
+/// \param value
+///
+void RtuModbusServer::setRestartTimeout(int value)
+{
+    _restartTimer.stop();
+    _restartTimeout = value;
+    _restartTimer.start(1000);
+}
+
+///
+/// \brief RtuModbusServer::processRequest
+/// \param request
+/// \return
+///
+QModbusResponse RtuModbusServer::processRequest(const QModbusPdu &request)
+{
+    _lastRequestTime = QDateTime::currentDateTime().toSecsSinceEpoch();
+    return QModbusRtuSerialServer::processRequest(request);
+}
+
+///
+/// \brief RtuModbusServer::on_timeout
+///
+void RtuModbusServer::on_timeout()
+{
+    if(_restartTimeout == 0) return;
+    if(state() != QModbusDevice::ConnectedState) return;
+
+    const auto nowTime = QDateTime::currentDateTime().toSecsSinceEpoch();
+    if(nowTime - _lastRequestTime > _restartTimeout)
+    {
+        disconnectDevice();
+        connectDevice();
+
+        _lastRequestTime = nowTime;
+        emit restarted();
+    }
 }

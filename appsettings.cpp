@@ -12,12 +12,13 @@
 #include <QCoreApplication>
 #include "appsettings.h"
 
-const Setting AppSettings::SmartCardReader =        { "SmartCardReader",          QString()    };
-const Setting AppSettings::SerialPortSettings =     { "SerialPortSettings",       QVariant()   };
-const Setting AppSettings::ModbusAddressType =      { "ModbusAddressType",        QString()    };
-const Setting AppSettings::ModbusStartAddress =     { "ModbusStartAddress",       1            };
-const Setting AppSettings::ModbusBufferSize =       { "ModbusBufferSize",         5            };
-const Setting AppSettings::ModbusServerAddress =    { "ModbusServerAddress",      1            };
+const Setting AppSettings::SmartCardReader =            { "SmartCardReader",            QString()    };
+const Setting AppSettings::SerialPortSettings =         { "SerialPortSettings",         QVariant()   };
+const Setting AppSettings::ModbusAddressType =          { "ModbusAddressType",          QString()    };
+const Setting AppSettings::ModbusStartAddress =         { "ModbusStartAddress",         1            };
+const Setting AppSettings::ModbusBufferSize =           { "ModbusBufferSize",           5            };
+const Setting AppSettings::ModbusServerAddress =        { "ModbusServerAddress",        1            };
+const Setting AppSettings::ModbusServerRestartTimeout = { "ModbusServerRestartTimeout", 30           };
 
 //
 /// \brief AppSettings::instance

@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     // настройка валидаторов ввода данных
     ui->startAddress->setValidator(new QIntValidator(1, 10000, this));
     ui->bufferSize->setValidator(new QIntValidator(1, 100, this));
+    ui->restartTimeout->setValidator(new QIntValidator(10, 86400, this));
 
     updateSmartReaderSelector();
     updateSerialPortSelector();
@@ -281,6 +282,14 @@ void MainWindow::on_rtuModbusServerDataWritten(QModbusDataUnit::RegisterType tab
 }
 
 ///
+/// \brief MainWindow::on_rtuModbusServerRestarted
+///
+void MainWindow::on_rtuModbusServerRestarted()
+{
+    qWarning() << "Modbus RTU сервер был перезапущен из-за отсутствия запросов со стороны клиента";
+}
+
+///
 /// \brief MainWindow::loadSettings
 ///
 void MainWindow::loadSettings()
@@ -298,14 +307,17 @@ void MainWindow::loadSettings()
     const auto modbusAddressType = AppSettings::instance()->GetSetting(AppSettings::ModbusAddressType).toString();
     ui->addressTypeSelector->setCurrentText(modbusAddressType);
 
-    const auto modbusStartAddress = AppSettings::instance()->GetSetting(AppSettings::ModbusStartAddress).toUInt();
-    ui->startAddress->setText(QString::number(modbusStartAddress));
+    const auto modbusStartAddress = AppSettings::instance()->GetSetting(AppSettings::ModbusStartAddress).toString();
+    ui->startAddress->setText(modbusStartAddress);
 
-    const auto modbusBufferSize = AppSettings::instance()->GetSetting(AppSettings::ModbusBufferSize).toUInt();
-    ui->bufferSize->setText(QString::number(modbusBufferSize));
+    const auto modbusBufferSize = AppSettings::instance()->GetSetting(AppSettings::ModbusBufferSize).toString();
+    ui->bufferSize->setText(modbusBufferSize);
 
     const auto serverAddress = AppSettings::instance()->GetSetting(AppSettings::ModbusServerAddress).toUInt();
     ui->serverAddress->setValue(serverAddress);
+
+    const auto restartTimeout = AppSettings::instance()->GetSetting(AppSettings::ModbusServerRestartTimeout).toString();
+    ui->restartTimeout->setText(restartTimeout);
 
     createRtuModbusServer();
 }
@@ -336,6 +348,9 @@ void MainWindow::saveSettings()
 
     const auto serverAddress = ui->serverAddress->value();
     AppSettings::instance()->SetSetting(AppSettings::ModbusServerAddress, serverAddress);
+
+    const auto restartTimeout = ui->restartTimeout->text();
+    AppSettings::instance()->SetSetting(AppSettings::ModbusServerRestartTimeout, restartTimeout);
 }
 
 ///
@@ -494,7 +509,11 @@ void MainWindow::createRtuModbusServer()
         connect(_rtuModbusServer.get(), &RtuModbusServer::dataWritten, this, &MainWindow::on_rtuModbusServerDataWritten);
         connect(_rtuModbusServer.get(), &RtuModbusServer::stateChanged, this, &MainWindow::on_rtuModbusServerStateChanged);
         connect(_rtuModbusServer.get(), &RtuModbusServer::errorOccurred, this, &MainWindow::on_rtuModbusServerErrorOccurred);
+        connect(_rtuModbusServer.get(), &RtuModbusServer::restarted, this, &MainWindow::on_rtuModbusServerRestarted);
         _rtuModbusServer->connectDevice();
+
+        const auto timeout = ui->restartTimeout->text().toInt();
+        _rtuModbusServer->setRestartTimeout(timeout);
 
         setupModbusTableWidget();
     }

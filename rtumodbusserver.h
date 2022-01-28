@@ -10,8 +10,9 @@
 #define RTUMODBUSSERVER_H
 
 #include <memory>
+#include <QTimer>
+#include <QDateTime>
 #include <QSerialPort>
-#include <QObject>
 #include "smartcardinfo.h"
 #include "rtumodbusdatabuffer.h"
 
@@ -31,7 +32,14 @@ class RtuModbusServer : public QModbusRtuSerialServer
     Q_OBJECT
 
 public:
+    ///
+    /// \brief RtuModbusServer
+    ///
     RtuModbusServer();
+
+    ///
+    /// \brief ~RtuModbusServer
+    ///
     virtual ~RtuModbusServer();
 
     ///
@@ -41,7 +49,7 @@ public:
     void addSmartCardInfo(const SmartCardInfo& smi);
 
     ///
-    /// \brief Создение адресного пространства Modbus RTU сервера
+    /// \brief Создание адресного пространства Modbus RTU сервера
     /// \param type - тип регистров (3x, 4x)
     /// \param start - начальный адрес (начиная с 0)
     /// \param count - количество регистров
@@ -49,7 +57,31 @@ public:
     ///
     void createRegisters(QModbusDataUnit::RegisterType type, quint16 start, quint16 count, quint8 alignment = 1);
 
-private:    
+    ///
+    /// \brief Таймаут перезапуска сервера
+    /// \return
+    ///
+    int restartTimeout() const;
+
+    ///
+    /// \brief Устанавливает таймаут перезапуска сервера
+    /// \param value
+    ///
+    void setRestartTimeout(int value);
+
+signals:
+    void restarted();
+
+private slots:
+    void on_timeout();
+
+protected:
+     QModbusResponse processRequest(const QModbusPdu &request) override;
+
+private:
+    int _restartTimeout;
+    QTimer _restartTimer;
+    qint64 _lastRequestTime;
     std::unique_ptr<RtuModbusDataBuffer> _buffer;
 };
 
